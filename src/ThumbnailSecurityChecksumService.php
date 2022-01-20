@@ -8,8 +8,7 @@ use Nette\Http\Url;
 
 class ThumbnailSecurityChecksumService
 {
-	/** @var string */
-	private $secret;
+	private string $secret;
 
 
 	public function __construct(string $secret)
