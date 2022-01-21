@@ -10,18 +10,17 @@ class ThumbnailSecurityChecksumServiceTest extends TestCase
 {
 
 
-	/**
-	 * @dataProvider dpParams
-	 */
+	/** @dataProvider dpParams */
 	public function testParamsAreCorrect(Url $url, DateTimeImmutable $currentTime, string $expectedUrl): void
 	{
 		$service = $this->createThumbnailSecurityChecksumService($currentTime);
+
 		$signedUrl = $service->signUrl($url);
 
 		$this->assertEquals($expectedUrl, $signedUrl->getAbsoluteUrl());
 	}
 
-
+	/** @return array<string, array<string, mixed>> */
 	public function dpParams(): array
 	{
 		return [
@@ -42,6 +41,7 @@ class ThumbnailSecurityChecksumServiceTest extends TestCase
 	public function testCustomValidityInterval(): void
 	{
 		$service = $this->createThumbnailSecurityChecksumService(new DateTimeImmutable('2020-01-23 00:11:22', new \DateTimeZone('Europe/Prague')));
+
 		$signedUrl = $service->signUrl(new Url('http://example.com/path'), new \DateInterval('P2DT3H'));
 
 		$this->assertSame(
@@ -50,13 +50,16 @@ class ThumbnailSecurityChecksumServiceTest extends TestCase
 		);
 	}
 
-
 	private function createThumbnailSecurityChecksumService(DateTimeImmutable $currentTime): ThumbnailSecurityChecksumService
 	{
-		$mock = \Mockery::mock(ThumbnailSecurityChecksumService::class . '[getCurrentTime]', ['imgTopSecret']);
-		$mock->shouldAllowMockingProtectedMethods();
-		$mock->shouldReceive('getCurrentTime')->andReturn($currentTime);
+		$mock = \Mockery::mock(ThumbnailSecurityChecksumService::class . '[getCurrentTime]', ['imgTopSecret'])
+			->shouldAllowMockingProtectedMethods();
 
+		$mock->allows([
+			'getCurrentTime' => $currentTime
+		]);
+
+		$this->assertInstanceOf(ThumbnailSecurityChecksumService::class, $mock);
 		return $mock;
 	}
 }
